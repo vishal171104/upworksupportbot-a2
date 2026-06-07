@@ -4,30 +4,11 @@ import sys
 
 import streamlit as st
 
-from config import CHROMA_PATH, COLLECTION_NAME, sync_streamlit_secrets
+from config import CHROMA_PATH, sync_streamlit_secrets
 
 sync_streamlit_secrets()
 
 from rag import answer, get_document_count, get_llm, get_vectorstore
-
-
-def run_ingestion() -> None:
-    env = os.environ.copy()
-    if "DOCS_PATH" in st.secrets:
-        env["DOCS_PATH"] = str(st.secrets["DOCS_PATH"])
-    if "DEEPINFRA_API_KEY" in st.secrets:
-        env["DEEPINFRA_API_KEY"] = str(st.secrets["DEEPINFRA_API_KEY"])
-
-    result = subprocess.run(
-        [sys.executable, "ingest.py"],
-        capture_output=True,
-        text=True,
-        env=env,
-    )
-    if result.returncode != 0:
-        st.error("Ingestion failed.")
-        st.code(result.stderr or result.stdout)
-        st.stop()
 
 
 @st.cache_resource
@@ -43,9 +24,24 @@ def load_llm():
 st.set_page_config(page_title="Upwork API Support Bot", page_icon="🤖")
 st.title("Upwork API Support Bot")
 
-if not os.path.isdir(CHROMA_PATH):
-    with st.spinner("Loading knowledge base..."):
-        run_ingestion()
+if not os.path.exists(CHROMA_PATH):
+    with st.spinner("🔄 Building knowledge base, please wait..."):
+        env = os.environ.copy()
+        if "DOCS_PATH" in st.secrets:
+            env["DOCS_PATH"] = str(st.secrets["DOCS_PATH"])
+        if "DEEPINFRA_API_KEY" in st.secrets:
+            env["DEEPINFRA_API_KEY"] = str(st.secrets["DEEPINFRA_API_KEY"])
+
+        result = subprocess.run(
+            [sys.executable, "ingest.py"],
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        st.write("Ingest output:", result.stdout)
+        if result.returncode != 0:
+            st.error(f"Ingestion failed: {result.stderr}")
+            st.stop()
 
 vectorstore = load_vectorstore()
 llm = load_llm()
