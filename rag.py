@@ -1,17 +1,12 @@
-import os
 import time
 
 import chromadb
-from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 
-load_dotenv()
-
-CHROMA_PATH = "./chroma_db"
-COLLECTION_NAME = "upwork_docs"
+from config import CHROMA_PATH, COLLECTION_NAME, get_env
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_BASE_URL = "https://api.deepinfra.com/v1/openai"
 LLM_MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
@@ -35,10 +30,21 @@ def get_vectorstore() -> Chroma:
     )
 
 
+def get_document_count() -> int:
+    client = chromadb.PersistentClient(path=CHROMA_PATH)
+    try:
+        collection = client.get_collection(COLLECTION_NAME)
+        return collection.count()
+    except (ValueError, chromadb.errors.NotFoundError):
+        return 0
+
+
 def get_llm() -> ChatOpenAI:
-    api_key = os.getenv("DEEPINFRA_API_KEY")
+    api_key = get_env("DEEPINFRA_API_KEY")
     if not api_key:
-        raise ValueError("DEEPINFRA_API_KEY environment variable is not set.")
+        raise ValueError(
+            "DEEPINFRA_API_KEY is not set. Configure it in .env or Streamlit secrets."
+        )
 
     return ChatOpenAI(
         base_url=LLM_BASE_URL,

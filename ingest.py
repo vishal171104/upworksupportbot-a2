@@ -1,38 +1,36 @@
 import os
 
 import chromadb
-from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-load_dotenv()
-
-DOCS_PATH = os.getenv("DOCS_PATH")
-CHROMA_PATH = "./chroma_db"
-COLLECTION_NAME = "upwork_docs"
+from config import CHROMA_PATH, COLLECTION_NAME, get_env
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 
 def main() -> None:
-    if not DOCS_PATH:
-        raise ValueError("DOCS_PATH environment variable is not set.")
+    docs_path = get_env("DOCS_PATH")
+    if not docs_path:
+        raise ValueError(
+            "DOCS_PATH is not set. Configure it in .env or Streamlit secrets."
+        )
 
-    if "path/to/" in DOCS_PATH:
+    if "path/to/" in docs_path:
         raise ValueError(
             "DOCS_PATH still uses the .env.example placeholder. "
             "Edit .env and set DOCS_PATH to the real Upwork API documentation PDF."
         )
 
-    if not os.path.isfile(DOCS_PATH):
+    if not os.path.isfile(docs_path):
         raise FileNotFoundError(
-            f"Documentation file not found: {DOCS_PATH}\n"
-            "Update DOCS_PATH in .env to point to your Upwork API documentation PDF."
+            f"Documentation file not found: {docs_path}\n"
+            "Set DOCS_PATH in .env or st.secrets to your Upwork API documentation PDF."
         )
 
-    print(f"Loading PDF from: {DOCS_PATH}")
-    loader = PyPDFLoader(DOCS_PATH)
+    print(f"Loading PDF from: {docs_path}")
+    loader = PyPDFLoader(docs_path)
     documents = loader.load()
 
     full_text = "\n".join(doc.page_content for doc in documents)
