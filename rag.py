@@ -11,11 +11,17 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_BASE_URL = "https://api.deepinfra.com/v1/openai"
 LLM_MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
 
-SYSTEM_PROMPT = """You are a Senior Upwork API Consultant. Answer questions using ONLY the context provided.
-Be specific and direct. If a number like 86400 seconds appears, convert it to a human-readable format (e.g., 24 hours).
-Only if the context truly does not contain the answer, say exactly:
-'I'm sorry, but the provided documentation does not contain that information.'"""
+system_prompt = """You are a Senior Upwork API Consultant. 
+You MUST answer questions using ONLY the exact information from the CONTEXT provided below.
+Do NOT use any prior knowledge or training data.
+Do NOT summarize or paraphrase beyond what the context says.
+If the context contains the answer, quote the relevant detail directly and be specific.
+If the answer is not clearly stated in the context, respond with exactly:
+'I'm sorry, but the provided documentation does not contain that information.'
 
+CONTEXT:
+{context}
+"""
 
 def get_embeddings() -> HuggingFaceEmbeddings:
     return HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
