@@ -1,0 +1,3 @@
+[server]
+# Avoid scanning transformers/sentence-transformers submodules (no torchvision needed).
+fileWatcherType = "none"
