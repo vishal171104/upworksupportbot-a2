@@ -11,7 +11,7 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_BASE_URL = "https://api.deepinfra.com/v1/openai"
 LLM_MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
 
-system_prompt = """You are a Senior Upwork API Consultant. 
+SYSTEM_PROMPT  = """You are a Senior Upwork API Consultant. 
 You MUST answer questions using ONLY the exact information from the CONTEXT provided below.
 Do NOT use any prior knowledge or training data.
 Do NOT summarize or paraphrase beyond what the context says.
