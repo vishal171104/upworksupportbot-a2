@@ -3,7 +3,7 @@ import time
 import chromadb
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 
 from config import CHROMA_PATH, COLLECTION_NAME, get_env
@@ -35,7 +35,7 @@ def get_document_count() -> int:
     try:
         collection = client.get_collection(COLLECTION_NAME)
         return collection.count()
-    except (ValueError, chromadb.errors.NotFoundError):
+    except Exception:
         return 0
 
 

@@ -1,10 +1,10 @@
 import os
 
 import chromadb
-from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from config import CHROMA_PATH, COLLECTION_NAME, get_env
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
@@ -49,7 +49,7 @@ def main() -> None:
     client = chromadb.PersistentClient(path=CHROMA_PATH)
     try:
         client.delete_collection(COLLECTION_NAME)
-    except (ValueError, chromadb.errors.NotFoundError):
+    except Exception:
         pass
 
     Chroma.from_documents(
